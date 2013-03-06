@@ -170,14 +170,227 @@ namespace brainfuck
             MethodInfo mi = typeof(Program).GetMethod("Interpret");
 
             // TODO: Opcode for the interpret function
+            ILGenerator ilg = interpretBuilder.GetILGenerator();
+
+            //.method public hidebysig static void  Interpret(string script) cil managed
+            //{
+            //  // Code size       471 (0x1d7)
+            //  .maxstack  3
+            //  .locals init ([0] char[] data,
+            //           [1] int32 inst_p,
+            //           [2] int32 data_p,
+            //           [3] int32 level,
+            //           [4] char CS$4$0000,
+            //           [5] bool CS$4$0001)
+            //  IL_0000:  nop
+            //  IL_0001:  ldc.i4     0x7530
+            ilg.Emit(OpCodes.Ldc_I4, 0x7530); // load the number 30000 onto the stack
+            //  IL_0006:  newarr     [mscorlib]System.Char
+            ilg.Emit(OpCodes.Newarr, typeof(char)); // new char[30000]
+            //  IL_000b:  stloc.0
+            ilg.Emit(OpCodes.Stloc_0); // pop value (I assume address of the array) from the stack and assign it to variable 0 (the char[])
+            //  IL_000c:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0); // push 0 onto the stack
+            //  IL_000d:  stloc.1
+            ilg.Emit(OpCodes.Stloc_1); // pop value from the stack and store as variable 1 (int)
+            //  IL_000e:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0); // push 0 onto the stack
+            //  IL_000f:  stloc.2
+            ilg.Emit(OpCodes.Stloc_2); // pop value from the stack and store as variable 2 (int)
+            //.method public hidebysig static void  Interpret(string script) cil managed
+            //{
+            //  // Code size       360 (0x168)
+            //  .maxstack  3
+            //  .locals init ([0] char[] data,
+            ilg.DeclareLocal(typeof(char[]));
+            //           [1] int32 inst_p,
+            ilg.DeclareLocal(typeof(int));
+            //           [2] int32 data_p,
+            ilg.DeclareLocal(typeof(int));
+            //           [3] int32 level,
+            ilg.DeclareLocal(typeof(int));
+            //           [4] int32 V_4,
+            ilg.DeclareLocal(typeof(int));
+            //           [5] char CS$0$0000)
+            ilg.DeclareLocal(typeof(char));
+            //  IL_0000:  ldc.i4     0x7530
+            //  IL_0005:  newarr     [mscorlib]System.Char
+            //  IL_000a:  stloc.0
+            //  IL_000b:  ldc.i4.0
+            //  IL_000c:  stloc.1
+            //  IL_000d:  ldc.i4.0
+            //  IL_000e:  stloc.2
+            //  IL_000f:  br         IL_015b
+            //  IL_0014:  ldarg.0
+            //  IL_0015:  ldloc.1
+            //  IL_0016:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_001b:  stloc.s    CS$0$0000
+            //  IL_001d:  ldloc.s    CS$0$0000
+            //  IL_001f:  ldc.i4.s   43
+            //  IL_0021:  sub
+            //  IL_0022:  switch     ( 
+            //                        IL_007a,
+            //                        IL_00bb,
+            //                        IL_0094,
+            //                        IL_00ae)
+            //  IL_0037:  ldloc.s    CS$0$0000
+            //  IL_0039:  ldc.i4.s   60
+            //  IL_003b:  sub
+            //  IL_003c:  switch     ( 
+            //                        IL_0071,
+            //                        IL_0157,
+            //                        IL_0068)
+            //  IL_004d:  ldloc.s    CS$0$0000
+            //  IL_004f:  ldc.i4.s   91
+            //  IL_0051:  sub
+            //  IL_0052:  switch     ( 
+            //                        IL_00c9,
+            //                        IL_0157,
+            //                        IL_0112)
+            //  IL_0063:  br         IL_0157
+            //  IL_0068:  ldloc.2
+            //  IL_0069:  ldc.i4.1
+            //  IL_006a:  add
+            //  IL_006b:  stloc.2
+            //  IL_006c:  br         IL_0157
+            //  IL_0071:  ldloc.2
+            //  IL_0072:  ldc.i4.1
+            //  IL_0073:  sub
+            //  IL_0074:  stloc.2
+            //  IL_0075:  br         IL_0157
+            //  IL_007a:  ldloc.0
+            //  IL_007b:  ldloc.2
+            //  IL_007c:  ldelema    [mscorlib]System.Char
+            //  IL_0081:  dup
+            //  IL_0082:  ldobj      [mscorlib]System.Char
+            //  IL_0087:  ldc.i4.1
+            //  IL_0088:  add
+            //  IL_0089:  conv.u2
+            //  IL_008a:  stobj      [mscorlib]System.Char
+            //  IL_008f:  br         IL_0157
+            //  IL_0094:  ldloc.0
+            //  IL_0095:  ldloc.2
+            //  IL_0096:  ldelema    [mscorlib]System.Char
+            //  IL_009b:  dup
+            //  IL_009c:  ldobj      [mscorlib]System.Char
+            //  IL_00a1:  ldc.i4.1
+            //  IL_00a2:  sub
+            //  IL_00a3:  conv.u2
+            //  IL_00a4:  stobj      [mscorlib]System.Char
+            //  IL_00a9:  br         IL_0157
+            //  IL_00ae:  ldloc.0
+            //  IL_00af:  ldloc.2
+            //  IL_00b0:  ldelem.u2
+            //  IL_00b1:  call       void [mscorlib]System.Console::Write(char)
+            //  IL_00b6:  br         IL_0157
+            //  IL_00bb:  ldloc.0
+            //  IL_00bc:  ldloc.2
+            //  IL_00bd:  call       int32 [mscorlib]System.Console::Read()
+            //  IL_00c2:  conv.u2
+            //  IL_00c3:  stelem.i2
+            //  IL_00c4:  br         IL_0157
+            //  IL_00c9:  ldloc.0
+            //  IL_00ca:  ldloc.2
+            //  IL_00cb:  ldelem.u2
+            //  IL_00cc:  brtrue     IL_0157
+            //  IL_00d1:  ldc.i4.0
+            //  IL_00d2:  stloc.3
+            //  IL_00d3:  br.s       IL_0103
+            //  IL_00d5:  ldarg.0
+            //  IL_00d6:  ldloc.1
+            //  IL_00d7:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_00dc:  ldc.i4.s   93
+            //  IL_00de:  bne.un.s   IL_00e3
+            //  IL_00e0:  ldloc.3
+            //  IL_00e1:  brfalse.s  IL_0157
+            //  IL_00e3:  ldarg.0
+            //  IL_00e4:  ldloc.1
+            //  IL_00e5:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_00ea:  ldc.i4.s   93
+            //  IL_00ec:  bne.un.s   IL_00f4
+            //  IL_00ee:  ldloc.3
+            //  IL_00ef:  ldc.i4.1
+            //  IL_00f0:  sub
+            //  IL_00f1:  stloc.3
+            //  IL_00f2:  br.s       IL_0103
+            //  IL_00f4:  ldarg.0
+            //  IL_00f5:  ldloc.1
+            //  IL_00f6:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_00fb:  ldc.i4.s   91
+            //  IL_00fd:  bne.un.s   IL_0103
+            //  IL_00ff:  ldloc.3
+            //  IL_0100:  ldc.i4.1
+            //  IL_0101:  add
+            //  IL_0102:  stloc.3
+            //  IL_0103:  ldloc.1
+            //  IL_0104:  ldc.i4.1
+            //  IL_0105:  add
+            //  IL_0106:  dup
+            //  IL_0107:  stloc.1
+            //  IL_0108:  ldarg.0
+            //  IL_0109:  callvirt   instance int32 [mscorlib]System.String::get_Length()
+            //  IL_010e:  blt.s      IL_00d5
+            //  IL_0110:  br.s       IL_0157
+            //  IL_0112:  ldloc.0
+            //  IL_0113:  ldloc.2
+            //  IL_0114:  ldelem.u2
+            //  IL_0115:  brfalse.s  IL_0157
+            //  IL_0117:  ldc.i4.0
+            //  IL_0118:  stloc.s    V_4
+            //  IL_011a:  br.s       IL_014f
+            //  IL_011c:  ldarg.0
+            //  IL_011d:  ldloc.1
+            //  IL_011e:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_0123:  ldc.i4.s   91
+            //  IL_0125:  bne.un.s   IL_012b
+            //  IL_0127:  ldloc.s    V_4
+            //  IL_0129:  brfalse.s  IL_0157
+            //  IL_012b:  ldarg.0
+            //  IL_012c:  ldloc.1
+            //  IL_012d:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_0132:  ldc.i4.s   91
+            //  IL_0134:  bne.un.s   IL_013e
+            //  IL_0136:  ldloc.s    V_4
+            //  IL_0138:  ldc.i4.1
+            //  IL_0139:  sub
+            //  IL_013a:  stloc.s    V_4
+            //  IL_013c:  br.s       IL_014f
+            //  IL_013e:  ldarg.0
+            //  IL_013f:  ldloc.1
+            //  IL_0140:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            //  IL_0145:  ldc.i4.s   93
+            //  IL_0147:  bne.un.s   IL_014f
+            //  IL_0149:  ldloc.s    V_4
+            //  IL_014b:  ldc.i4.1
+            //  IL_014c:  add
+            //  IL_014d:  stloc.s    V_4
+            //  IL_014f:  ldloc.1
+            //  IL_0150:  ldc.i4.1
+            //  IL_0151:  sub
+            //  IL_0152:  dup
+            //  IL_0153:  stloc.1
+            //  IL_0154:  ldc.i4.0
+            //  IL_0155:  bge.s      IL_011c
+            //  IL_0157:  ldloc.1
+            //  IL_0158:  ldc.i4.1
+            //  IL_0159:  add
+            //  IL_015a:  stloc.1
+            //  IL_015b:  ldloc.1
+            //  IL_015c:  ldarg.0
+            //  IL_015d:  callvirt   instance int32 [mscorlib]System.String::get_Length()
+            //  IL_0162:  blt        IL_0014
+            //  IL_0167:  ret
+            //} // end of method Program::Interpret
+
+
 
             // build the main method (calls Interpret(script))
             MethodBuilder mainBuilder = typeBuilder.DefineMethod("Main", MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig, typeof(int), new Type[] { typeof(string[]) });
-            ILGenerator ilg = mainBuilder.GetILGenerator();
-            ilg.Emit(OpCodes.Ldstr, script); // push the script onto the stack
-            ilg.Emit(OpCodes.Call, interpretBuilder); // call Interpret(script)
-            ilg.Emit(OpCodes.Ldc_I4_0); // push 0 onto the stack
-            ilg.Emit(OpCodes.Ret);  // return 0
+            ILGenerator ilg_main = mainBuilder.GetILGenerator();
+            ilg_main.Emit(OpCodes.Ldstr, script); // push the script onto the stack
+            ilg_main.Emit(OpCodes.Call, interpretBuilder); // call Interpret(script)
+            ilg_main.Emit(OpCodes.Ldc_I4_0); // push 0 onto the stack
+            ilg_main.Emit(OpCodes.Ret);  // return 0
 
             // actually create the type
             typeBuilder.CreateType();
