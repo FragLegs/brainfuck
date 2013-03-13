@@ -172,31 +172,19 @@ namespace brainfuck
             // TODO: Opcode for the interpret function
             ILGenerator ilg = interpretBuilder.GetILGenerator();
 
-            //.method public hidebysig static void  Interpret(string script) cil managed
-            //{
-            //  // Code size       471 (0x1d7)
-            //  .maxstack  3
-            //  .locals init ([0] char[] data,
-            //           [1] int32 inst_p,
-            //           [2] int32 data_p,
-            //           [3] int32 level,
-            //           [4] char CS$4$0000,
-            //           [5] bool CS$4$0001)
-            //  IL_0000:  nop
-            //  IL_0001:  ldc.i4     0x7530
-            ilg.Emit(OpCodes.Ldc_I4, 0x7530); // load the number 30000 onto the stack
-            //  IL_0006:  newarr     [mscorlib]System.Char
-            ilg.Emit(OpCodes.Newarr, typeof(char)); // new char[30000]
-            //  IL_000b:  stloc.0
-            ilg.Emit(OpCodes.Stloc_0); // pop value (I assume address of the array) from the stack and assign it to variable 0 (the char[])
-            //  IL_000c:  ldc.i4.0
-            ilg.Emit(OpCodes.Ldc_I4_0); // push 0 onto the stack
-            //  IL_000d:  stloc.1
-            ilg.Emit(OpCodes.Stloc_1); // pop value from the stack and store as variable 1 (int)
-            //  IL_000e:  ldc.i4.0
-            ilg.Emit(OpCodes.Ldc_I4_0); // push 0 onto the stack
-            //  IL_000f:  stloc.2
-            ilg.Emit(OpCodes.Stloc_2); // pop value from the stack and store as variable 2 (int)
+            // define some labels
+            Label while_loop = ilg.DefineLabel();
+            Label loop_condition = ilg.DefineLabel();
+            Label plus = ilg.DefineLabel();
+            Label minus = ilg.DefineLabel();
+            Label less_than = ilg.DefineLabel();
+            Label greater_than = ilg.DefineLabel();
+            Label period = ilg.DefineLabel();
+            Label comma = ilg.DefineLabel();
+            Label left_bracket = ilg.DefineLabel();
+            Label right_bracket = ilg.DefineLabel();
+            Label default_char = ilg.DefineLabel();
+
             //.method public hidebysig static void  Interpret(string script) cil managed
             //{
             //  // Code size       360 (0x168)
@@ -214,51 +202,91 @@ namespace brainfuck
             //           [5] char CS$0$0000)
             ilg.DeclareLocal(typeof(char));
             //  IL_0000:  ldc.i4     0x7530
+            ilg.Emit(OpCodes.Ldc_I4, 0x7530);       // load the number 30000 onto the stack
             //  IL_0005:  newarr     [mscorlib]System.Char
+            ilg.Emit(OpCodes.Newarr, typeof(char)); // new char[30000]
             //  IL_000a:  stloc.0
+            ilg.Emit(OpCodes.Stloc_0);              // pop value (address of the array) from the stack and assign it to data
             //  IL_000b:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0);             // push 0 onto the stack
             //  IL_000c:  stloc.1
+            ilg.Emit(OpCodes.Stloc_1);              // pop value from the stack and store as inst_p
             //  IL_000d:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0);             // push 0 onto the stack
             //  IL_000e:  stloc.2
+            ilg.Emit(OpCodes.Stloc_2);              // pop value from the stack and store as data_p
             //  IL_000f:  br         IL_015b
+            ilg.Emit(OpCodes.Br, loop_condition);   // check the loop condition
+            ilg.MarkLabel(while_loop);              // if it was true, come back here and start the while loop
             //  IL_0014:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);              // load script onto the stack
             //  IL_0015:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);              // load inst_p onto stack
             //  IL_0016:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            ilg.Emit(OpCodes.Callvirt, typeof(string).GetMethod("get_Chars", new Type[]{ typeof(int) }));  // get the char in script at inst_p
             //  IL_001b:  stloc.s    CS$0$0000
+            ilg.Emit(OpCodes.Stloc_S, (byte)5);     // store script[inst_p] in local var 5
             //  IL_001d:  ldloc.s    CS$0$0000
+            ilg.Emit(OpCodes.Ldloc_S, (byte)5);     // push script[inst_p] back onto the stack
             //  IL_001f:  ldc.i4.s   43
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)43);   // pushes '+' onto the stack
             //  IL_0021:  sub
+            ilg.Emit(OpCodes.Sub);                  // script[inst_p] - '+' onto stack
             //  IL_0022:  switch     ( 
             //                        IL_007a,
             //                        IL_00bb,
             //                        IL_0094,
             //                        IL_00ae)
+            ilg.Emit(OpCodes.Switch, new Label[] { plus, comma, minus, period });   // switch on one of these labels
             //  IL_0037:  ldloc.s    CS$0$0000
+            ilg.Emit(OpCodes.Ldloc_S, (byte)5);    // if fall through, push script[inst_p] back onto stack
             //  IL_0039:  ldc.i4.s   60
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)60);   // pushes '<' onto the stack
             //  IL_003b:  sub
+            ilg.Emit(OpCodes.Sub);                  // script[inst_p] - '<' onto stack
             //  IL_003c:  switch     ( 
             //                        IL_0071,
             //                        IL_0157,
             //                        IL_0068)
+            ilg.Emit(OpCodes.Switch, new Label[] { less_than, default_char, greater_than });   // switch on one of these labels
             //  IL_004d:  ldloc.s    CS$0$0000
+            ilg.Emit(OpCodes.Ldloc_S, (byte)5);    // if fall through, push script[inst_p] back onto stack
             //  IL_004f:  ldc.i4.s   91
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)91);   // pushes '[' onto the stack
             //  IL_0051:  sub
+            ilg.Emit(OpCodes.Sub);                  // script[inst_p] - '[' onto stack
             //  IL_0052:  switch     ( 
             //                        IL_00c9,
             //                        IL_0157,
             //                        IL_0112)
+            ilg.Emit(OpCodes.Switch, new Label[] { left_bracket, default_char, right_bracket });   // switch on one of these labels
             //  IL_0063:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // if no matches, branch to default_char
+            ilg.MarkLabel(greater_than);            // begin '>' processing
             //  IL_0068:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_0069:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // push 1 onto stack
             //  IL_006a:  add
+            ilg.Emit(OpCodes.Add);                  // increment data_p
             //  IL_006b:  stloc.2
+            ilg.Emit(OpCodes.Stloc_2);              // store result in data_p
             //  IL_006c:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // branch to default_char
+            ilg.MarkLabel(less_than);               // begin '<' processing
             //  IL_0071:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_0072:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // push 1 onto stack
             //  IL_0073:  sub
+            ilg.Emit(OpCodes.Sub);                  // decrement data_p
             //  IL_0074:  stloc.2
+            ilg.Emit(OpCodes.Stloc_2);              // store result in data_p
             //  IL_0075:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // branch to default_char
+            ilg.MarkLabel(plus);                    // begin '+' processing
             //  IL_007a:  ldloc.0
+            ilg.Emit(OpCodes.Ldloc_0);              // load data pointer onto stack
             //  IL_007b:  ldloc.2
             //  IL_007c:  ldelema    [mscorlib]System.Char
             //  IL_0081:  dup
@@ -375,11 +403,17 @@ namespace brainfuck
             //  IL_0158:  ldc.i4.1
             //  IL_0159:  add
             //  IL_015a:  stloc.1
+            ilg.MarkLabel(loop_condition);       // check the loop condition
             //  IL_015b:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);          // load local variable 1 (inst_p) onto stack
             //  IL_015c:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);          // load arg 0 (script) onto stack
             //  IL_015d:  callvirt   instance int32 [mscorlib]System.String::get_Length()
+            ilg.Emit(OpCodes.Callvirt, typeof(string).GetMethod("get_Length", Type.EmptyTypes)); // get the length of the string
             //  IL_0162:  blt        IL_0014
+            ilg.Emit(OpCodes.Blt, while_loop);  // if inst_p < length of the string, go to while_loop
             //  IL_0167:  ret
+            ilg.Emit(OpCodes.Ret);              // return
             //} // end of method Program::Interpret
 
 
