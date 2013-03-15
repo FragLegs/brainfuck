@@ -184,6 +184,7 @@ namespace brainfuck
             Label left_bracket = ilg.DefineLabel();
             Label right_bracket = ilg.DefineLabel();
             Label default_char = ilg.DefineLabel();
+            Label left_bracket_condition = ilg.DefineLabel();
 
             //.method public hidebysig static void  Interpret(string script) cil managed
             //{
@@ -272,7 +273,7 @@ namespace brainfuck
             //  IL_006b:  stloc.2
             ilg.Emit(OpCodes.Stloc_2);              // store result in data_p
             //  IL_006c:  br         IL_0157
-            ilg.Emit(OpCodes.Br, default_char);     // branch to default_char
+            ilg.Emit(OpCodes.Br, default_char);     // break
             ilg.MarkLabel(less_than);               // begin '<' processing
             //  IL_0071:  ldloc.2
             ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
@@ -283,47 +284,88 @@ namespace brainfuck
             //  IL_0074:  stloc.2
             ilg.Emit(OpCodes.Stloc_2);              // store result in data_p
             //  IL_0075:  br         IL_0157
-            ilg.Emit(OpCodes.Br, default_char);     // branch to default_char
+            ilg.Emit(OpCodes.Br, default_char);     // break
             ilg.MarkLabel(plus);                    // begin '+' processing
             //  IL_007a:  ldloc.0
-            ilg.Emit(OpCodes.Ldloc_0);              // load data pointer onto stack
+            ilg.Emit(OpCodes.Ldloc_0);              // load data array onto stack
             //  IL_007b:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_007c:  ldelema    [mscorlib]System.Char
+            ilg.Emit(OpCodes.Ldelema, typeof(char));// load the address of the char at data[data_p]
             //  IL_0081:  dup
+            ilg.Emit(OpCodes.Dup);                  // duplicate the address
             //  IL_0082:  ldobj      [mscorlib]System.Char
+            ilg.Emit(OpCodes.Ldobj, typeof(char));  // load the value at data[data_p]
             //  IL_0087:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // load 1 onto stack
             //  IL_0088:  add
+            ilg.Emit(OpCodes.Add);                  // increment the value from data[data_p]
             //  IL_0089:  conv.u2
+            ilg.Emit(OpCodes.Conv_U2);              // convert to a uint16
             //  IL_008a:  stobj      [mscorlib]System.Char
+            ilg.Emit(OpCodes.Stobj, typeof(char));  // store at address of data[data_p]
             //  IL_008f:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // break
+            ilg.MarkLabel(minus);                   // begin processing '-'
             //  IL_0094:  ldloc.0
+            ilg.Emit(OpCodes.Ldloc_0);              // load data array onto stack
             //  IL_0095:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_0096:  ldelema    [mscorlib]System.Char
+            ilg.Emit(OpCodes.Ldelema, typeof(char));// load the address of the char at data[data_p]
             //  IL_009b:  dup
+            ilg.Emit(OpCodes.Dup);                  // duplicate the address
             //  IL_009c:  ldobj      [mscorlib]System.Char
+            ilg.Emit(OpCodes.Ldobj, typeof(char));  // load the value at data[data_p]
             //  IL_00a1:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // load 1 onto stack
             //  IL_00a2:  sub
+            ilg.Emit(OpCodes.Sub);                  // decrement the value from data[data_p]
             //  IL_00a3:  conv.u2
+            ilg.Emit(OpCodes.Conv_U2);              // convert to a uint16
             //  IL_00a4:  stobj      [mscorlib]System.Char
+            ilg.Emit(OpCodes.Stobj, typeof(char));  // store at address of data[data_p]
             //  IL_00a9:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // break
+            ilg.MarkLabel(period);                  // begin '.' processing
             //  IL_00ae:  ldloc.0
+            ilg.Emit(OpCodes.Ldloc_0);              // load data array onto stack
             //  IL_00af:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_00b0:  ldelem.u2
+            ilg.Emit(OpCodes.Ldelem_U2);            // load value at data[data_p]
             //  IL_00b1:  call       void [mscorlib]System.Console::Write(char)
+            ilg.Emit(OpCodes.Call, typeof(System.Console).GetMethod("Write", new Type[] { typeof(char) })); // write the char to console
             //  IL_00b6:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // break
+            ilg.MarkLabel(comma);                   // begin ',' processing
             //  IL_00bb:  ldloc.0
+            ilg.Emit(OpCodes.Ldloc_0);              // load data array onto stack
             //  IL_00bc:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_00bd:  call       int32 [mscorlib]System.Console::Read()
+            ilg.Emit(OpCodes.Call, typeof(System.Console).GetMethod("Read", Type.EmptyTypes)); // read a char from console
             //  IL_00c2:  conv.u2
+            ilg.Emit(OpCodes.Conv_U2);              // convert to uint16
             //  IL_00c3:  stelem.i2
+            ilg.Emit(OpCodes.Stelem_I2);            // store read value at data[data_p]
             //  IL_00c4:  br         IL_0157
+            ilg.Emit(OpCodes.Br, default_char);     // break
+            ilg.MarkLabel(left_bracket);            // begin '[' processing
             //  IL_00c9:  ldloc.0
+            ilg.Emit(OpCodes.Ldloc_0);              // load data array onto stack
             //  IL_00ca:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_00cb:  ldelem.u2
+            ilg.Emit(OpCodes.Ldelem_U2);            // load value at data[data_p]
             //  IL_00cc:  brtrue     IL_0157
+            ilg.Emit(OpCodes.Brtrue, default_char); // if data[data_p] != 0, break
             //  IL_00d1:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0);             // otherwise, load 0
             //  IL_00d2:  stloc.3
+            ilg.Emit(OpCodes.Stloc_3);              // level = 0
             //  IL_00d3:  br.s       IL_0103
+            ilg.Emit(OpCodes.Br_S, left_bracket_condition); // branch to the condition for the left_bracket_loop
             //  IL_00d5:  ldarg.0
             //  IL_00d6:  ldloc.1
             //  IL_00d7:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
@@ -350,11 +392,17 @@ namespace brainfuck
             //  IL_0100:  ldc.i4.1
             //  IL_0101:  add
             //  IL_0102:  stloc.3
+            ilg.MarkLabel(left_bracket_condition);      // start the left bracket condition
             //  IL_0103:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);                  // load inst_p
             //  IL_0104:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);                 // load 1
             //  IL_0105:  add
+            ilg.Emit(OpCodes.Add);                      // increment inst_p
             //  IL_0106:  dup
+            ilg.Emit(OpCodes.Dup);                      // duplicate inst_p
             //  IL_0107:  stloc.1
+            ilg.Emit(OpCodes.Stloc_1);                  // store new inst_p
             //  IL_0108:  ldarg.0
             //  IL_0109:  callvirt   instance int32 [mscorlib]System.String::get_Length()
             //  IL_010e:  blt.s      IL_00d5
