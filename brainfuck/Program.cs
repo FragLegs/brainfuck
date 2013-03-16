@@ -115,8 +115,11 @@ namespace brainfuck
                             // walk until we find the closing ]
                             while (++inst_p < script.Length)
                             {
-                                if (script[inst_p] == ']' && level == 0) break;
-                                else if (script[inst_p] == ']') level--;
+                                if (script[inst_p] == ']')
+                                {
+                                    if (level == 0) break;
+                                    else level--;
+                                }
                                 else if (script[inst_p] == '[') level++;
                             }
                         }
@@ -130,8 +133,11 @@ namespace brainfuck
                             // walk until we find the closing [
                             while (--inst_p >= 0)
                             {
-                                if (script[inst_p] == '[' && level == 0) break;
-                                else if (script[inst_p] == '[') level--;
+                                if (script[inst_p] == '[')
+                                {
+                                    if (level == 0) break;
+                                    else level--;
+                                }
                                 else if (script[inst_p] == ']') level++;
                             }
                         }
@@ -185,6 +191,10 @@ namespace brainfuck
             Label right_bracket = ilg.DefineLabel();
             Label default_char = ilg.DefineLabel();
             Label left_bracket_condition = ilg.DefineLabel();
+            Label left_bracket_loop = ilg.DefineLabel();
+            Label not_right_bracket = ilg.DefineLabel();
+            Label right_bracket_condition = ilg.DefineLabel();
+            Label right_bracket_loop = ilg.DefineLabel();
 
             //.method public hidebysig static void  Interpret(string script) cil managed
             //{
@@ -366,32 +376,63 @@ namespace brainfuck
             ilg.Emit(OpCodes.Stloc_3);              // level = 0
             //  IL_00d3:  br.s       IL_0103
             ilg.Emit(OpCodes.Br_S, left_bracket_condition); // branch to the condition for the left_bracket_loop
+            ilg.MarkLabel(left_bracket_loop);       // start left bracket loop
             //  IL_00d5:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);              // load script
             //  IL_00d6:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);              // load inst_p
             //  IL_00d7:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            ilg.Emit(OpCodes.Callvirt, typeof(String).GetMethod("get_Chars", new Type[] { typeof(int) })); // get script[inst_p]
             //  IL_00dc:  ldc.i4.s   93
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)93);   // load ']'
             //  IL_00de:  bne.un.s   IL_00e3
+            ilg.Emit(OpCodes.Bne_Un_S, not_right_bracket); // if script[inst_p] != ']', goto not_right_bracket
             //  IL_00e0:  ldloc.3
+            ilg.Emit(OpCodes.Ldloc_3);              // load level
             //  IL_00e1:  brfalse.s  IL_0157
+            ilg.Emit(OpCodes.Brfalse_S, default_char);  // if level == 0, break
+            // No need to check right bracket twice
+            /*
+            ilg.MarkLabel(not_right_bracket);
             //  IL_00e3:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);              // load script
             //  IL_00e4:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);              // load inst_p
             //  IL_00e5:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            ilg.Emit(OpCodes.Callvirt, typeof(String).GetMethod("get_Chars", new Type[] { typeof(int) })); // get script[inst_p]
             //  IL_00ea:  ldc.i4.s   93
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)93);   // load ']'
             //  IL_00ec:  bne.un.s   IL_00f4
+            */
             //  IL_00ee:  ldloc.3
+            ilg.Emit(OpCodes.Ldloc_3);              // load level
             //  IL_00ef:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // load 1
             //  IL_00f0:  sub
+            ilg.Emit(OpCodes.Sub);                  // decrement level
             //  IL_00f1:  stloc.3
+            ilg.Emit(OpCodes.Stloc_3);              // store new level
             //  IL_00f2:  br.s       IL_0103
+            ilg.Emit(OpCodes.Br_S, left_bracket_condition); // check loop condition
+            ilg.MarkLabel(not_right_bracket);
             //  IL_00f4:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);              // load script
             //  IL_00f5:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);              // load inst_p
             //  IL_00f6:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            ilg.Emit(OpCodes.Callvirt, typeof(String).GetMethod("get_Chars", new Type[] { typeof(int) })); // get script[inst_p]
             //  IL_00fb:  ldc.i4.s   91
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)91);   // load '['
             //  IL_00fd:  bne.un.s   IL_0103
+            ilg.Emit(OpCodes.Bne_Un_S, left_bracket_condition); // if script[inst_p] != '[' goto loop condition
             //  IL_00ff:  ldloc.3
+            ilg.Emit(OpCodes.Ldloc_3);              // load level
             //  IL_0100:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // load 1
             //  IL_0101:  add
+            ilg.Emit(OpCodes.Add);                  // increment level
             //  IL_0102:  stloc.3
+            ilg.Emit(OpCodes.Stloc_3);              // store new level
             ilg.MarkLabel(left_bracket_condition);      // start the left bracket condition
             //  IL_0103:  ldloc.1
             ilg.Emit(OpCodes.Ldloc_1);                  // load inst_p
@@ -404,9 +445,13 @@ namespace brainfuck
             //  IL_0107:  stloc.1
             ilg.Emit(OpCodes.Stloc_1);                  // store new inst_p
             //  IL_0108:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);                  // load script
             //  IL_0109:  callvirt   instance int32 [mscorlib]System.String::get_Length()
+            ilg.Emit(OpCodes.Callvirt, typeof(String).GetMethod("get_Length", Type.EmptyTypes)); // get the length of the script
             //  IL_010e:  blt.s      IL_00d5
+            ilg.Emit(OpCodes.Blt_S, left_bracket_loop); // if inst_p < script.Length, do loop
             //  IL_0110:  br.s       IL_0157
+            ilg.Emit(OpCodes.Br_S, default_char);       // otherwise, break
             //  IL_0112:  ldloc.0
             //  IL_0113:  ldloc.2
             //  IL_0114:  ldelem.u2
