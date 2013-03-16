@@ -535,6 +535,7 @@ namespace brainfuck
             ilg.Emit(OpCodes.Ldc_I4_0);                 // load 0
             //  IL_0155:  bge.s      IL_011c
             ilg.Emit(OpCodes.Bge_S, right_bracket_loop); // if inst_p >= 0, goto right_bracket_loop
+            ilg.MarkLabel(default_char);
             //  IL_0157:  ldloc.1
             ilg.Emit(OpCodes.Ldloc_1);          // load inst_p
             //  IL_0158:  ldc.i4.1
