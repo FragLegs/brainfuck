@@ -195,6 +195,7 @@ namespace brainfuck
             Label not_right_bracket = ilg.DefineLabel();
             Label right_bracket_condition = ilg.DefineLabel();
             Label right_bracket_loop = ilg.DefineLabel();
+            Label not_left_bracket = ilg.DefineLabel();
 
             //.method public hidebysig static void  Interpret(string script) cil managed
             //{
@@ -209,7 +210,7 @@ namespace brainfuck
             //           [3] int32 level,
             ilg.DeclareLocal(typeof(int));
             //           [4] int32 V_4,
-            ilg.DeclareLocal(typeof(int));
+            ilg.DeclareLocal(typeof(int));      // level (different namespace)
             //           [5] char CS$0$0000)
             ilg.DeclareLocal(typeof(char));
             //  IL_0000:  ldc.i4     0x7530
@@ -452,50 +453,96 @@ namespace brainfuck
             ilg.Emit(OpCodes.Blt_S, left_bracket_loop); // if inst_p < script.Length, do loop
             //  IL_0110:  br.s       IL_0157
             ilg.Emit(OpCodes.Br_S, default_char);       // otherwise, break
+            ilg.MarkLabel(right_bracket);           // begin ']' processing
             //  IL_0112:  ldloc.0
+            ilg.Emit(OpCodes.Ldloc_0);              // load data array onto stack
             //  IL_0113:  ldloc.2
+            ilg.Emit(OpCodes.Ldloc_2);              // load data_p onto stack
             //  IL_0114:  ldelem.u2
+            ilg.Emit(OpCodes.Ldelem_U2);            // load value at data[data_p]
             //  IL_0115:  brfalse.s  IL_0157
+            ilg.Emit(OpCodes.Brfalse_S, default_char); // if data[data_p] == 0, break
             //  IL_0117:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0);             // otherwise, load 0
             //  IL_0118:  stloc.s    V_4
+            ilg.Emit(OpCodes.Stloc_S, (byte)4);     // level = 0
             //  IL_011a:  br.s       IL_014f
+            ilg.Emit(OpCodes.Br_S, right_bracket_condition); // branch to the condition for the right_bracket_loop
+            ilg.MarkLabel(right_bracket_loop);       // start right bracket loop
             //  IL_011c:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);              // load script
             //  IL_011d:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);              // load inst_p
             //  IL_011e:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            ilg.Emit(OpCodes.Callvirt, typeof(String).GetMethod("get_Chars", new Type[] { typeof(int) })); // get script[inst_p]
             //  IL_0123:  ldc.i4.s   91
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)91);   // load '['
             //  IL_0125:  bne.un.s   IL_012b
+            ilg.Emit(OpCodes.Bne_Un_S, not_left_bracket); // if script[inst_p] != ']', goto not_left_bracket
             //  IL_0127:  ldloc.s    V_4
+            ilg.Emit(OpCodes.Ldloc_S, (byte)4);     // load level
             //  IL_0129:  brfalse.s  IL_0157
+            ilg.Emit(OpCodes.Brfalse_S, default_char);  // if level == 0, break
+            // No need to check left bracket twice
+            /*
             //  IL_012b:  ldarg.0
             //  IL_012c:  ldloc.1
             //  IL_012d:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
             //  IL_0132:  ldc.i4.s   91
             //  IL_0134:  bne.un.s   IL_013e
+            */
             //  IL_0136:  ldloc.s    V_4
+            ilg.Emit(OpCodes.Ldloc_S, (byte)4);     // load level
             //  IL_0138:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // load 1
             //  IL_0139:  sub
+            ilg.Emit(OpCodes.Sub);                  // decrement level
             //  IL_013a:  stloc.s    V_4
+            ilg.Emit(OpCodes.Stloc_S, (byte)4);     // store new level
             //  IL_013c:  br.s       IL_014f
+            ilg.Emit(OpCodes.Br_S, right_bracket_condition); // check loop condition
+            ilg.MarkLabel(not_left_bracket);
             //  IL_013e:  ldarg.0
+            ilg.Emit(OpCodes.Ldarg_0);              // load script
             //  IL_013f:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);              // load inst_p
             //  IL_0140:  callvirt   instance char [mscorlib]System.String::get_Chars(int32)
+            ilg.Emit(OpCodes.Callvirt, typeof(String).GetMethod("get_Chars", new Type[] { typeof(int) })); // get script[inst_p]
             //  IL_0145:  ldc.i4.s   93
+            ilg.Emit(OpCodes.Ldc_I4_S, (byte)93);   // load ']'
             //  IL_0147:  bne.un.s   IL_014f
+            ilg.Emit(OpCodes.Bne_Un_S, right_bracket_condition); // if script[inst_p] != '[' goto loop condition
             //  IL_0149:  ldloc.s    V_4
+            ilg.Emit(OpCodes.Ldloc_S, (byte)4);     // load level
             //  IL_014b:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);             // load 1
             //  IL_014c:  add
+            ilg.Emit(OpCodes.Add);                  // increment level
             //  IL_014d:  stloc.s    V_4
+            ilg.Emit(OpCodes.Stloc_S, (byte)4);     // store new level
+            ilg.MarkLabel(right_bracket_condition);      // start the right bracket condition
             //  IL_014f:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);                  // load inst_p
             //  IL_0150:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);                 // load 1
             //  IL_0151:  sub
+            ilg.Emit(OpCodes.Sub);                      // decrement inst_p
             //  IL_0152:  dup
+            ilg.Emit(OpCodes.Dup);                      // duplicate inst_p
             //  IL_0153:  stloc.1
+            ilg.Emit(OpCodes.Stloc_1);                  // store new inst_p
             //  IL_0154:  ldc.i4.0
+            ilg.Emit(OpCodes.Ldc_I4_0);                 // load 0
             //  IL_0155:  bge.s      IL_011c
+            ilg.Emit(OpCodes.Bge_S, right_bracket_loop); // if inst_p >= 0, goto right_bracket_loop
             //  IL_0157:  ldloc.1
+            ilg.Emit(OpCodes.Ldloc_1);          // load inst_p
             //  IL_0158:  ldc.i4.1
+            ilg.Emit(OpCodes.Ldc_I4_1);         // load 1
             //  IL_0159:  add
+            ilg.Emit(OpCodes.Add);              // increment inst_p
             //  IL_015a:  stloc.1
+            ilg.Emit(OpCodes.Stloc_1);          // store new inst_p
             ilg.MarkLabel(loop_condition);       // check the loop condition
             //  IL_015b:  ldloc.1
             ilg.Emit(OpCodes.Ldloc_1);          // load local variable 1 (inst_p) onto stack
